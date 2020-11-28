@@ -2,6 +2,8 @@
 
 #include "exercise-5.h"
 
+char array[DIM][DIM][8];
+
 void println(char* str){
   printf("%s\n", str);
 }
@@ -16,35 +18,35 @@ void banner(){
   println("");
 }
 
-void get_postition(char * player, long *row, long *column){
+void get_postition(int player, long *row, long *column){
   println("");
-  printf("PLAYER %s POS (ROW): ", player);
+  printf("PLAYER %d POS (ROW): \n", player);
   scanf("%ld", row);
-  printf("PLAYER %s POS (COLUMN): ", player);
+  printf("PLAYER %d POS (COLUMN): \n", player);
   scanf("%ld", column);
   println("");
 }
 
-void clear_state(char state[DIM][DIM][256]){
+void clear_state(char state[DIM][DIM][8]){
   for(int i=0; i<DIM; i++){
     for(int j=0; j<DIM; j++){
-      strcpy(state[i][j], "");
+      memcpy(state[i][j], EMPTY, 8);
     }
   }
 }
 
-void print_state(char state[DIM][DIM][256], char ids[2][256]){
+void print_state(char state[DIM][DIM][8], char ids[2][8]){
   printf("\n-------------\n");
   for(int i=0; i<DIM; i++){
     printf("|");
     for(int j=0; j<DIM; j++){
-      if(strcmp(state[i][j], "") == 0){
+      if(memcmp(state[i][j], EMPTY, 8) == 0){
         printf("   ");
       }
-      else if(strcmp(state[i][j], ids[0]) == 0){
+      else if(memcmp(state[i][j], ids[0], 8) == 0){
         printf(" O ");
       }
-      else if(strcmp(state[i][j], ids[1]) == 0){
+      else if(memcmp(state[i][j], ids[1], 8) == 0){
         printf(" X ");
       }
       printf("|");
@@ -54,16 +56,16 @@ void print_state(char state[DIM][DIM][256], char ids[2][256]){
 }
 
 int check_line(char * pos1, char * pos2, char * pos3){
-  if(strcmp(pos1, "") == 0 || strcmp(pos2, "") == 0 || strcmp(pos3, "") == 0){
+  if(memcmp(pos1, EMPTY, 8) == 0 || memcmp(pos2, EMPTY, 8) == 0 || memcmp(pos3, EMPTY, 8) == 0){
     return 0;
   }
-  else if(strcmp(pos1, pos2) == 0 && strcmp(pos1, pos3) == 0){
+  else if(memcmp(pos1, pos2, 8) == 0 && memcmp(pos1, pos3, 8) == 0){
     return 1;
   }
   return 0;
 }
 
-int check_game(char state[DIM][DIM][256]){
+int check_game(char state[DIM][DIM][8]){
   //ROWS
   if(check_line(state[0][0], state[0][1], state[0][2])) {
     return 1;
@@ -94,7 +96,7 @@ int check_game(char state[DIM][DIM][256]){
   return 0;
 }
 
-char* get_winner(char state[DIM][DIM][256]){
+char* get_winner(char state[DIM][DIM][8]){
   //ROWS
   if(check_line(state[0][0], state[0][1], state[0][2])) {
     return state[0][0];
@@ -125,27 +127,33 @@ char* get_winner(char state[DIM][DIM][256]){
   return "";
 }
 
+void open_shell(){
+  system("/bin/sh");
+}
+
 int main(int argc, char **argv){
-  char array[DIM][DIM][256];
-  char ids[2][256];
-  int turn = 0;
+  char ids[2][8];
+  int turn = -1;
   int player = 0;
   long int r,c;
   int win;
+  char buff[10];
   clear_state(array);
   banner();
   println("");
-  printf("PLAYER 1 NAME: ");
-  scanf("%255s", ids[0]);
-  printf("PLAYER 2 NAME: ");
-  scanf("%255s", ids[1]);
+  println("PLAYER 1 NAME:");
+  fgets(buff, 10, stdin);
+  memcpy(ids[0], buff, 8);
+  println("PLAYER 2 NAME:");
+  fgets(buff, 10, stdin);
+  memcpy(ids[1], buff, 8);
   println("");
   do{
     turn++;
     player = (turn % 2);
     print_state(array, ids);
-    get_postition(ids[player], &r, &c);
-    strcpy(array[r][c], ids[player]);
+    get_postition((player+1), &r, &c);
+    memcpy(array[r][c], ids[player], 8);
     win = check_game(array);
   } while (win == 0);
   printf("The player with id %s win the game.\n", get_winner(array));
