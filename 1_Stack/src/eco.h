@@ -1,0 +1,2 @@
+
+char* gets(char* str);
